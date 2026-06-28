@@ -1,0 +1,33 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  pythonVersion: '3.11'
+
+steps:
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: $(pythonVersion)
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r chapter-1/requirements.txt
+  displayName: Install dependencies
+
+- script: |
+    python -m py_compile chapter-1/env2.py
+  displayName: Verify Python code
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'chapter-1'
+    includeRootFolder: false
+    archiveType: zip
+    archiveFile: '$(Build.ArtifactStagingDirectory)/flaskapp.zip'
+
+- publish: $(Build.ArtifactStagingDirectory)/flaskapp.zip
+  artifact: drop
